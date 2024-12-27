@@ -62,5 +62,16 @@ public class ContactManagementSystemControllerTest {
           Contact updatedContact = [SELECT Phone FROM Contact WHERE Id = :contact.Id];
           System.assertEquals(updatedContact.Phone, '111111111', 'El teléfono debería haberse actualizado correctamente.');
       }
+    
+    @isTest
+    static void dContacts() {
+        Contact contact = [SELECT Id FROM Contact WHERE Email = 'juan.perez@example.com' LIMIT 1];
+        Id contactId = contact.Id;
+        Test.startTest();
+        ContactManagementSystemController.dContacts(new List<Id>{contactId});
+        Test.stopTest();
+        List<Contact> deletedContacts = [SELECT Id FROM Contact WHERE Id = :contactId];
+        System.assertEquals(deletedContacts.size(), 0, 'El contacto debería haber sido eliminado.');
+    } // El test dura 400ms , se puede deber a que el objeto contacts tiene 4 relaciones y salesforce verifica de fondo en los delete que no se rompa la integridad entre estas.
       
 }
