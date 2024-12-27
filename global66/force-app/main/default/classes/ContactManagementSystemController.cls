@@ -1,11 +1,11 @@
 public with sharing class ContactManagementSystemController {
     @AuraEnabled
-    private static void cContacts(List<Contacto> contacts) {
+    public static void cContacts(List<Contact> contacts) {
         try{
             List<Contact> contactosValidos = new List<Contact>();
 
             for (Contact c : contacts) {
-                if (c.Email == null)    { //Controlo la condicion principal que el correo no este en nulo antes de armar la lista a insetar
+                if (c.Email != null)    { //Controlo la condicion principal que el correo no este en nulo antes de armar la lista a insetar
                    contactosValidos.add(c);
                 } 
                 else    {
@@ -21,25 +21,32 @@ public with sharing class ContactManagementSystemController {
         }
     }
     @AuraEnabled
-    private static void uContacts(List<Contact> contacts) {
+    public static void uContacts(List<Contact> contacts) {
         try{
             List<Contact> contactosValidos = new List<Contact>();
+            List<String> errores = new List<String>();
             for (Contact c : contacts) {
                 if (c.Email != null) {
                     contactosValidos.add(c);
                 } 
                 else    {
-                    throw new AuraHandledException('El campo Email es obligatorio para todos los contactos.');
+                    errores.add('El campo Email es obligatorio para el contacto con Id: ' + c.Id);
                 }
             }
+            if (!errores.isEmpty()) {
+                String mensajeErrores = String.join(errores, '; ');
+                throw new AuraHandledException('Errores: ' + mensajeErrores);
+            }
             if (!contactosValidos.isEmpty())    {
-                insert contactosValidos;
+                update contactosValidos;
                 }
+                
         }
         catch(Exception e) {
             throw new AuraHandledException('Algo salio mal: ' + e.getMessage());
         }
     }
+
     @AuraEnabled
     public static void dContacts(List<Id> contactIds) {
         try{
@@ -55,8 +62,8 @@ public with sharing class ContactManagementSystemController {
         }
     }
  
-  
-    private static List<Contact> rContacts() {
+    @AuraEnabled
+    public static List<Contact> rContacts() {
         try{
             List<Contact> contacts = [SELECT Id, FirstName, LastName, Email, Phone FROM Contact WHERE Email != null];
             return contacts;
