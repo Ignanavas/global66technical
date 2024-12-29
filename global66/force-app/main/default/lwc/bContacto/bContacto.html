@@ -1,0 +1,31 @@
+<template>
+    <lightning-card title="Borrar Contactos" icon-name="standard:record">
+        <template lwc:if={accounts}>
+            <div class="slds-var-m-around_medium">
+                <lightning-vertical-navigation>
+                    <lightning-vertical-navigation-section label="Reports">
+                        <template for:each={accounts} for:item="account">   
+                            <lightning-layout
+                                key={account.Id}
+                                class="slds-var-m-vertical_x-small">
+                                <lightning-layout-item flexibility="grow">
+                                    {account.Name}
+                                </lightning-layout-item>
+                                <lightning-layout-item>
+                                    <lightning-button-icon
+                                        icon-name="utility:delete"
+                                        onclick={deleteAccount}
+                                        data-recordid={account.Id}
+                                    ></lightning-button-icon>
+                                </lightning-layout-item>
+                            </lightning-layout>
+                        </template>
+                    </lightning-vertical-navigation-section>
+                </lightning-vertical-navigation>
+            </div>
+        </template>
+        <template lwc:elseif={error}>
+            <c-error-panel errors={error}></c-error-panel>
+        </template>
+    </lightning-card>
+</template>

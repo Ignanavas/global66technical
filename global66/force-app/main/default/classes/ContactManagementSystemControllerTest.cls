@@ -64,7 +64,7 @@ public class ContactManagementSystemControllerTest {
       }
     
     @isTest
-    static void dContacts() {
+    static void dContactsTest() {
         Contact contact = [SELECT Id FROM Contact WHERE Email = 'juan.perez@example.com' LIMIT 1];
         Id contactId = contact.Id;
         Test.startTest();
@@ -75,14 +75,13 @@ public class ContactManagementSystemControllerTest {
     } // El test dura 400ms , se puede deber a que el objeto contacts tiene 4 relaciones y salesforce verifica de fondo en los delete que no se rompa la integridad entre estas.
     
     @isTest
-    static void rContacts() {
+    static void rContactsTest() {
         Test.startTest();
         List<Contact> contacts = ContactManagementSystemController.rContacts();
         Test.stopTest();
         System.assertNotEquals(contacts.size(), 0, 'Debería haber al menos un contacto.');
         System.assertEquals(contacts[0].Email, 'juan.perez@example.com', 'El primer contacto debería ser el creado.');
     }
+   
 
-    
-    
 }

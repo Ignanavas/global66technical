@@ -9,15 +9,19 @@ public with sharing class ContactManagementSystemController {
                    contactosValidos.add(c);
                 } 
                 else    {
-                    throw new AuraHandledException('El campo Email es obligatorio para todos los contactos.');     
+                    throw new AuraHandledException('El campo Email es obligatorio para todos los contactos.');
                 }
             }
             if (!contactosValidos.isEmpty())    {
                 insert contactosValidos;
                 }
         }
+        catch(DmlException e) {
+            throw new AuraHandledException('Error al insertar :'+e.getMessage()); 
+        }
+    
         catch(Exception e) {
-            throw new AuraHandledException('Algo salio mal: ' + e.getMessage());
+            throw new AuraHandledException(e.getMessage());
         }
     }
     @AuraEnabled
@@ -43,7 +47,8 @@ public with sharing class ContactManagementSystemController {
                 
         }
         catch(Exception e) {
-            throw new AuraHandledException('Algo salio mal: ' + e.getMessage());
+          
+            throw new AuraHandledException(e.getMessage());
         }
     }
 
@@ -58,7 +63,7 @@ public with sharing class ContactManagementSystemController {
             }
         }
         catch(Exception e) {
-            throw new AuraHandledException('Algo salio mal: ' + e.getMessage());
+            throw new AuraHandledException( e.getMessage());
         }
     }
  
@@ -66,7 +71,12 @@ public with sharing class ContactManagementSystemController {
     public static List<Contact> rContacts() {
         try{
             List<Contact> contacts = [SELECT Id, FirstName, LastName, Email, Phone FROM Contact WHERE Email != null];
-            return contacts;
+            if (!contacts.isEmpty()) {
+                return contacts;
+            }
+            else {
+                throw new AuraHandledException('No se encontraron contactos.');
+            }
         }
         catch(Exception e) {
             throw new AuraHandledException('Algo salio mal: ' + e.getMessage());
