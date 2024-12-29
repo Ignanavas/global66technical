@@ -8,6 +8,8 @@ import { reduceErrors } from 'c/ldsUtils';
 export default class bContacto extends LightningElement {
     accounts;
     error;
+
+    /** Wired Apex result so it can be refreshed programmatically */
     wiredAccountsResult;
 
     @wire(getAccountList)
