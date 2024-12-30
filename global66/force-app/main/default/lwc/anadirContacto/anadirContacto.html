@@ -9,21 +9,4 @@
             <lightning-button variant="brand" label="Agregar Contacto" onclick={addContact} class="slds-m-top_medium"></lightning-button>
         </div>
     </lightning-card>
-
-    <lightning-card title="Lista de Contactos" class="slds-m-top_medium">
-
-            <lightning-datatable
-                data={contacts.data}
-                columns={columns}
-                key-field="Id"
-                onrowselection={getSelectedName}
-                onsave={handleSave}
-
-            >
-            </lightning-datatable>
-    
-    </lightning-card>
-    <template if:true={error}>
-        <c-error-panel errors={error}></c-error-panel>
-    </template>
 </template>

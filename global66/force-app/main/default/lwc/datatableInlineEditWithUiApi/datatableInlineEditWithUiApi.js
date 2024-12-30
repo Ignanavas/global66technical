@@ -1,46 +1,68 @@
-import { LightningElement, wire } from 'lwc';
-import rContacts from '@salesforce/apex/ContactManagementSystemController.rContacts';
+import { LightningElement, wire,api } from 'lwc';
 import { refreshApex } from '@salesforce/apex';
-import { deleteRecord } from 'lightning/uiRecordApi';  // Importar deleteRecord
+import { updateRecord } from 'lightning/uiRecordApi';
+import rContacts from '@salesforce/apex/ContactManagementSystemController.rContacts';
+
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import FIRSTNAME_FIELD from '@salesforce/schema/Contact.FirstName';
+import LASTNAME_FIELD from '@salesforce/schema/Contact.LastName';
+import TITLE_FIELD from '@salesforce/schema/Contact.Title';
+import PHONE_FIELD from '@salesforce/schema/Contact.Phone';
+import EMAIL_FIELD from '@salesforce/schema/Contact.Email';
 
-
-const actions = [
-    { label: 'Show details', name: 'show_details' },
-    { label: 'Delete', name: 'delete' }
-];
 const COLS = [
-    { label: 'First Name', fieldName: 'FirstName' ,editable : 'true',sortable: true },
-    { label: 'Last Name', fieldName: 'LastName',editable : 'true' },
-    { label: 'Phone', fieldName: 'Phone', type: 'phone' ,editable : 'true'},
-    { label: 'Email', fieldName: 'Email', type: 'email' ,editable : 'true'},
-    { type: 'action', typeAttributes: { rowActions: actions, menuAlignment: 'left' } }
+    {
+        label: 'First Name',
+        fieldName: FIRSTNAME_FIELD.fieldApiName,
+        editable: true
+    },
+    {
+        label: 'Last Name',
+        fieldName: LASTNAME_FIELD.fieldApiName,
+        editable: true
+    },
+    { label: 'Title', fieldName: TITLE_FIELD.fieldApiName, editable: true },
+    {
+        label: 'Phone',
+        fieldName: PHONE_FIELD.fieldApiName,
+        type: 'phone',
+        editable: true
+    },
+    {
+        label: 'Email',
+        fieldName: EMAIL_FIELD.fieldApiName,
+        type: 'email',
+        editable: true
+    }
 ];
-
-
 export default class DatatableInlineEditWithUiApi extends LightningElement {
     columns = COLS;
     draftValues = [];
-    selectedRecords = []; 
+    
+    @api totalNumberOfRows;
     loadMoreStatus;
-    @wire(rContacts)
-    contacts;
-    btnDelete = false;
+    data = [];
+
+    @wire(rContacts) contacts;
 
     async handleSave(event) {
+        // Convert datatable draft values into record objects
         const records = event.detail.draftValues.slice().map((draftValue) => {
             const fields = Object.assign({}, draftValue);
             return { fields };
         });
 
+        // Clear all datatable draft values
         this.draftValues = [];
 
         try {
+            // Update all records in parallel thanks to the UI API
             const recordUpdatePromises = records.map((record) =>
                 updateRecord(record)
             );
             await Promise.all(recordUpdatePromises);
 
+            // Report success with a toast
             this.dispatchEvent(
                 new ShowToastEvent({
                     title: 'Success',
@@ -49,6 +71,7 @@ export default class DatatableInlineEditWithUiApi extends LightningElement {
                 })
             );
 
+            // Display fresh data in the datatable
             await refreshApex(this.contacts);
         } catch (error) {
             this.dispatchEvent(
@@ -61,68 +84,37 @@ export default class DatatableInlineEditWithUiApi extends LightningElement {
         }
     }
 
-    getSelectedName(event) {
-        const selectedRows = event.detail.selectedRows;
-        // Display that fieldName of the selected rows
-        for (let i = 0; i < selectedRows.length; i++) {
-            alert('You selected: ' + selectedRows[i].Id);
-        }
-    }
-
     loadMoreData(event) {
-        event.target.isLoading = true;
-        this.loadMoreStatus = ' ';
-        rContacts(10).then((data) => {
-            if (data.length >= this.totalNumberOfRows) {
-                event.target.enableInfiniteLoading = false;
-                this.loadMoreStatus = 'No more data to load';
-            } else {
-                const currentData = this.data;
-                //Appends new data to the end of the table
-                const newData = currentData.concat(data);
-                this.data = newData;
-                this.loadMoreStatus = '';
-            }
-            event.target.isLoading = false;
-        });
-    }
-
-    handleSelect(event) {
-        const selectedRows = event.detail.selectedRows;
-        for (let i = 0; i < selectedRows.length; i++) {
-            alert('You selected: ' + selectedRows[i].Id);
-        }
-
-    }
-    handleRowAction(event) {
-        const action = event.detail.action;
-        const row = event.detail.row;
-        switch (action.name) {
-            case 'show_details':
-                alert('Showing Details: ' + JSON.stringify(row));
-                break;
-            case 'delete':
-                const rows = this.data;
-                const rowIndex = rows.indexOf(row);
-                rows.splice(rowIndex, 1);
-                this.data = rows;
-                break;
-        }
-    }
-
-
-   updateColumnSorting(event) {
-        try{
-            var fieldName = event.detail.fieldName;
-            var sortDirection = event.detail.sortDirection;
-            this.sortedBy = fieldName;
-            this.sortedDirection = sortDirection;
-            this.data = this.sortData(fieldName, sortDirection);
-        }
-        catch (error) {
-            console.error('Error en la ordenación:', error);
-        }
-    } 
+       /* // Verificar que el evento y el target no son null
+        if (event && event.target) {
+            // Mostrar un spinner para indicar que los datos están siendo cargados
+            event.target.isLoading = true;
+            // Mostrar "Cargando..." mientras se cargan los datos
+            this.loadMoreStatus = 'Cargando...';
     
-
+            // Llamar a la función fetchData para obtener más datos (50 registros en este caso)
+            fetchData(50).then((data) => {
+                if (data.length >= this.totalNumberOfRows) {
+                    event.target.enableInfiniteLoading = false;  // Desactivar la carga infinita si no hay más datos
+                    this.loadMoreStatus = 'No hay más datos para cargar';  // Mostrar mensaje de fin de carga
+                } else {
+                    const currentData = this.data;  // Los datos actuales cargados
+                    // Agregar los nuevos datos a la tabla
+                    const newData = currentData.concat(data);
+                    this.data = newData;
+                    this.loadMoreStatus = '';  // Limpiar el estado de carga
+                }
+                event.target.isLoading = false;  // Ocultar el spinner de carga
+            }).catch((error) => {
+                // Manejo de errores
+                console.error('Error al cargar los datos:', error);
+                this.loadMoreStatus = 'Error al cargar los datos';
+                if (event.target) {
+                    event.target.isLoading = false;  // Asegurarse de ocultar el spinner incluso si ocurre un error
+                }
+            });
+        } else {
+            console.error("No se encontró el evento o el target del evento.");
+        } */
+    }
 }

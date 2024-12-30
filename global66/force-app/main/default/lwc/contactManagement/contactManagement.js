@@ -1,8 +1,9 @@
-import { LightningElement, track } from 'lwc';
+import { LightningElement, track,wire } from 'lwc';
 import addContacts from '@salesforce/apex/ContactManagementSystemController.cContacts';
 import updateContacts from '@salesforce/apex/ContactManagementSystemController.uContacts';
 import deleteContacts from '@salesforce/apex/ContactManagementSystemController.dContacts';
-import getContacts from '@salesforce/apex/ContactManagementSystemController.rContacts';
+import rContacts from '@salesforce/apex/ContactManagementSystemController.rContacts';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
 export default class ContactManagement extends LightningElement {
     @track firstName = '';
@@ -13,17 +14,27 @@ export default class ContactManagement extends LightningElement {
     @track isLoading = false;
     @track selectedContacts = [];
     @track error = false; 
+    @wire(rContacts) contacts;
+    draftValues = [];
+
 
     columns = [
-        { label: 'Nombre', fieldName: 'FirstName' },
-        { label: 'Apellido', fieldName: 'LastName' },
-        { label: 'Correo Electrónico', fieldName: 'Email' },
-        { label: 'Número de Teléfono', fieldName: 'Phone' },
+        { label: 'Nombre', fieldName: 'FirstName',editable:true },
+        { label: 'Apellido', fieldName: 'LastName',editable:true },
+        { label: 'Correo Electrónico', fieldName: 'Email',editable:true },
+        { label: 'Número de Teléfono', fieldName: 'Phone',editable:true },
         { type: 'button', typeAttributes: { label: 'Eliminar', name: 'delete', iconName: 'utility:delete', variant: 'destructive' } }
     ];
 
     connectedCallback() {
         this.loadContacts();
+    }
+
+    getSelectedEmail(event) {
+        // Display the Contact of the selected rows
+        event.detail.selectedRows.forEach((selectedRow) => {
+            alert('Selected email addresses: ' + selectedRow.Email);
+        });
     }
 
     handleInputChange(event) {
@@ -45,10 +56,10 @@ export default class ContactManagement extends LightningElement {
             try {
                 await addContacts({ contacts: [{ FirstName: this.firstName, LastName: this.lastName, Email: this.email, Phone: this.phone }] });
                 this.loadContacts();
-                this.clearForm();
-            
+                this.clearForm();            
             } 
             catch (error) {
+                this.errorMessage = reduceErrors(this.error);
                 console.error('Error al agregar contacto:', error);
                 alert(error.body.message);
             }
@@ -119,4 +130,37 @@ export default class ContactManagement extends LightningElement {
         this.email = '';
         this.phone = '';
     }
+
+    async handleSave(event) {
+        const updatedFields = event.detail.draftValues;
+
+        // Clear all datatable draft values
+        this.draftValues = [];
+
+        try {
+            // Pass edited fields to the updateContacts Apex controller
+            await updateContacts({ contactsForUpdate: updatedFields });
+
+            // Report success with a toast
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Success',
+                    message: 'Contacts updated',
+                    variant: 'success'
+                })
+            );
+
+            // Display fresh data in the datatable
+            await refreshApex(this.contacts);
+        } catch (error) {
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Error while updating or refreshing records',
+                    message: error.body.message,
+                    variant: 'error'
+                })
+            );
+        }
+    }
+
 }
