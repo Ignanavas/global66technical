@@ -6,7 +6,6 @@ import rContacts from '@salesforce/apex/ContactManagementSystemController.rConta
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import FIRSTNAME_FIELD from '@salesforce/schema/Contact.FirstName';
 import LASTNAME_FIELD from '@salesforce/schema/Contact.LastName';
-import TITLE_FIELD from '@salesforce/schema/Contact.Title';
 import PHONE_FIELD from '@salesforce/schema/Contact.Phone';
 import EMAIL_FIELD from '@salesforce/schema/Contact.Email';
 
@@ -21,7 +20,6 @@ const COLS = [
         fieldName: LASTNAME_FIELD.fieldApiName,
         editable: true
     },
-    { label: 'Title', fieldName: TITLE_FIELD.fieldApiName, editable: true },
     {
         label: 'Phone',
         fieldName: PHONE_FIELD.fieldApiName,
@@ -85,7 +83,8 @@ export default class DatatableInlineEditWithUiApi extends LightningElement {
     }
 
     loadMoreData(event) {
-       /* // Verificar que el evento y el target no son null
+       /* IMPORTANTE ARREGLAR
+       // Verificar que el evento y el target no son null
         if (event && event.target) {
             // Mostrar un spinner para indicar que los datos están siendo cargados
             event.target.isLoading = true;

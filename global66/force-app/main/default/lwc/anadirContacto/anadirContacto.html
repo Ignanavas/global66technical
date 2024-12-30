@@ -1,12 +1,39 @@
 <template>
-    <lightning-card title="Gestión de Contactos">
-        <div class="slds-m-around_medium">
-            <lightning-input label="Nombre" value={firstName} onchange={handleInputChange} data-id="firstName"></lightning-input>
-            <lightning-input label="Apellido" value={lastName} onchange={handleInputChange} data-id="lastName"></lightning-input>
-            <lightning-input label="Correo Electrónico" value={email} onchange={handleInputChange} data-id="email" required></lightning-input>
-            <lightning-input label="Número de Teléfono" value={phone} onchange={handleInputChange} data-id="phone"></lightning-input>
-
-            <lightning-button variant="brand" label="Agregar Contacto" onclick={addContact} class="slds-m-top_medium"></lightning-button>
+    <lightning-card title="DispatchRefreshEvent" icon-name="standard:account">
+        <div class="slds-var-m-around_medium">
+            <lightning-record-edit-form
+                object-api-name="Contact"
+                onsuccess={handleSuccess}
+            >
+                <lightning-messages></lightning-messages>
+                <lightning-input-field
+                    field-name={nameField}
+                    class="name"
+                    required 
+                ></lightning-input-field>
+                <lightning-input-field
+                    field-name={lNameField}
+                    class="lastName"
+                ></lightning-input-field>
+                <lightning-input-field
+                    field-name={phoneField}
+                    class="phone"
+                ></lightning-input-field>
+                <lightning-input-field
+                
+                    field-name={emailField}
+                    class="email"
+                    required
+                ></lightning-input-field>
+                <div class="slds-var-m-top_medium">
+                    <lightning-button
+                        variant="brand"
+                        type="submit"
+                        name="save"
+                        label="Save"
+                    ></lightning-button>
+                </div>
+            </lightning-record-edit-form>
         </div>
     </lightning-card>
 </template>
