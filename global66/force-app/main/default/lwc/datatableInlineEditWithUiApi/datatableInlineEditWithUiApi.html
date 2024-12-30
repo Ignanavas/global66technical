@@ -1,4 +1,3 @@
-<!-- sldsValidatorIgnore - hiding datatable accessibility warning -->
 <template>
     <lightning-card
         title="Datatable Inline Edit With UI API"
@@ -6,22 +5,29 @@
     >
         <div class="slds-var-m-around_medium">
             <template lwc:if={contacts.data}>
+                <lightning-button label="Select" onclick={handleSelect}> </lightning-button>
                 <lightning-datatable
                     key-field="Id"
                     data={contacts.data}
                     columns={columns}
                     onsave={handleSave}
-                    draft-values={draftValues}
-                    hide-checkbox-column
+                    onrowselection={getSelectedName}
+                    enable-infinite-loading
+                    onloadmore={loadMoreData}
+                    onrowaction={handleRowAction}
+                    onsort={updateColumnSorting}
+                    column-widths-mode="auto"
+
+
                 >
                 </lightning-datatable>
+                <lightning-button lwc:if={btnDelete} label="Delete Selected"></lightning-button>
+
             </template>
             <template lwc:elseif={contacts.error}>
                 <c-error-panel errors={contacts.error}></c-error-panel>
             </template>
         </div>
-        <c-view-source source="lwc/datatableInlineEditWithUiApi" slot="footer">
-            Display data in a table with inline editing with the UI API.
-        </c-view-source>
+
     </lightning-card>
 </template>

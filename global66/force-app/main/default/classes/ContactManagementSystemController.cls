@@ -86,7 +86,7 @@ public with sharing class ContactManagementSystemController {
     @AuraEnabled(cacheable=true)
     public static List<Contact> rContacts() {
         try{
-            List<Contact> contacts = [SELECT Id, FirstName, LastName, Email, Phone FROM Contact WHERE Email != null LIMIT 10];
+            List<Contact> contacts = [SELECT Id, FirstName, LastName, Email, Phone FROM Contact WHERE Email != null];
             if (!contacts.isEmpty()) {
                 return contacts;
             }
