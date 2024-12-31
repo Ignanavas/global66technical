@@ -67,22 +67,11 @@ public with sharing class ContactManagementSystemController {
         }
     }
     @AuraEnabled
-    public static void deleteContacts(list<Id> lstConIds){
-        try {
-            list<Contact> lstConsToDelete = new list<Contact>();
-            System.debug('lstConIds ====> '+lstConIds);
-            for(Id idCon : lstConIds) {
-                lstConsToDelete.add(new Contact(Id = idCon));
-            }
-            if(!lstConsToDelete.isEmpty()) {
-                delete lstConsToDelete;
-            }
-        }
-        catch(Exception ex) {
-            throw new AuraHandledException(ex.getMessage());
-        }
+    public static void deleteContacts(List<Contact> accList){
+    delete accList;
     }
-    
+
+     
     @AuraEnabled(cacheable=true)
     public static List<Contact> rContacts() {
         try{

@@ -2,12 +2,14 @@ import { LightningElement, wire,api } from 'lwc';
 import { refreshApex } from '@salesforce/apex';
 import { updateRecord } from 'lightning/uiRecordApi';
 import rContacts from '@salesforce/apex/ContactManagementSystemController.rContacts';
-
+import deleteContacts from '@salesforce/apex/ContactManagementSystemController.deleteContacts';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import FIRSTNAME_FIELD from '@salesforce/schema/Contact.FirstName';
 import LASTNAME_FIELD from '@salesforce/schema/Contact.LastName';
 import PHONE_FIELD from '@salesforce/schema/Contact.Phone';
 import EMAIL_FIELD from '@salesforce/schema/Contact.Email';
+import { deleteRecord } from 'lightning/uiRecordApi';
+
 
 const COLS = [
     {
@@ -116,4 +118,39 @@ export default class DatatableInlineEditWithUiApi extends LightningElement {
             console.error("No se encontró el evento o el target del evento.");
         } */
     }
+
+    handleDeleteRecords() {
+        const selectedRows = this.template.querySelector('lightning-datatable').getSelectedRows();
+        console.log(selectedRows); 
+        const accountIds = selectedRows.map(row => row.Id);
+        console.log(accountIds);
+        deleteContacts({accList: selectedRows})
+       
+                .then((result) => {
+                    // Mostrar un mensaje de éxito
+                    const event = new ShowToastEvent({
+                        title: 'Success',
+                        message: 'Records deleted successfully.',
+                        variant: 'success'
+                    });
+                    this.dispatchEvent(event);
+                    refreshApex(this.contacts);
+                })
+                .catch((error) => {
+                    // Mostrar un mensaje de error si algo falla
+                    const event = new ShowToastEvent({
+                        title: 'Error',
+                        message: 'An error occurred while deleting records.',
+                        variant: 'error'
+                    });
+                    this.dispatchEvent(event);
+                });
+    }
+
+    // Método para refrescar los datos de la tabla
+    refreshData() {
+        // Lógica para refrescar los datos, por ejemplo, hacer una llamada a Apex para obtener los registros actualizados
+        console.log('Data refreshed');
+    }
 }
+

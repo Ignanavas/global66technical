@@ -2,9 +2,14 @@
 <template>
     <lightning-card
         title="Ver Contactos"
-        icon-name="account_info"
+        icon-name="standard:account"
     >
         <div class="slds-var-m-around_medium">
+            <lightning-button 
+                label="Delete Selected Records" 
+                onclick={handleDeleteRecords} 
+                variant="destructive"
+            ></lightning-button>
             <template lwc:if={contacts.data}>
                 <div style="height: 23rem;">
 
@@ -15,10 +20,8 @@
                         columns={columns}
                         onsave={handleSave}
                         draft-values={draftValues}
-                        hide-checkbox-column 
                         enable-infinite-loading
                         onloadmore={loadMoreData}
-                        max-column-width="auto"
                         >
                 
                     </lightning-datatable>
