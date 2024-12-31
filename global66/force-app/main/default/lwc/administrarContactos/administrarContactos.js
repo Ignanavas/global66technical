@@ -8,10 +8,8 @@ import FIRSTNAME_FIELD from '@salesforce/schema/Contact.FirstName';
 import LASTNAME_FIELD from '@salesforce/schema/Contact.LastName';
 import PHONE_FIELD from '@salesforce/schema/Contact.Phone';
 import EMAIL_FIELD from '@salesforce/schema/Contact.Email';
-import { deleteRecord } from 'lightning/uiRecordApi';
 
-
-const COLS = [
+    const COLS = [
     {
         label: 'First Name',
         fieldName: FIRSTNAME_FIELD.fieldApiName,
@@ -34,8 +32,14 @@ const COLS = [
         type: 'email',
         editable: true
     }
-];
-export default class DatatableInlineEditWithUiApi extends LightningElement {
+    ];
+
+export default class AdministrarContactos extends LightningElement {
+    
+
+
+
+
     columns = COLS;
     draftValues = [];
     
@@ -121,9 +125,6 @@ export default class DatatableInlineEditWithUiApi extends LightningElement {
 
     handleDeleteRecords() {
         const selectedRows = this.template.querySelector('lightning-datatable').getSelectedRows();
-        console.log(selectedRows); 
-        const accountIds = selectedRows.map(row => row.Id);
-        console.log(accountIds);
         deleteContacts({accList: selectedRows})
        
                 .then((result) => {
@@ -137,10 +138,9 @@ export default class DatatableInlineEditWithUiApi extends LightningElement {
                     refreshApex(this.contacts);
                 })
                 .catch((error) => {
-                    // Mostrar un mensaje de error si algo falla
                     const event = new ShowToastEvent({
                         title: 'Error',
-                        message: 'An error occurred while deleting records.',
+                        message: error.body.message,
                         variant: 'error'
                     });
                     this.dispatchEvent(event);

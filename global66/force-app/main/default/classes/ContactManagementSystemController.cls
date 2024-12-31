@@ -68,7 +68,12 @@ public with sharing class ContactManagementSystemController {
     }
     @AuraEnabled
     public static void deleteContacts(List<Contact> accList){
+    try{
     delete accList;
+    }
+      catch   (Exception e)   {
+        throw new AuraHandledException(e.getMessage());
+    }
     }
 
      
